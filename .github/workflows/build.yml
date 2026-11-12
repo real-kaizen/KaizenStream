@@ -9,17 +9,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Unzip project
+        run: |
+          mkdir proj
+          unzip -q KaizenStream.zip -d proj
+          echo "GV=$(tr -d '[:space:]' < proj/gradle-version.txt)" >> $GITHUB_ENV
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: "8.7"
-      - name: Unzip project
-        run: |
-          mkdir proj
-          unzip -q KaizenStream.zip -d proj
+          gradle-version: ${{ env.GV }}
       - name: Build
         working-directory: proj
         run: gradle assembleDebug --no-daemon
@@ -28,4 +29,3 @@ jobs:
           tag_name: v${{ github.run_number }}
           name: Kaizen Stream build ${{ github.run_number }}
           files: proj/app/build/outputs/apk/debug/app-debug.apk
-          
